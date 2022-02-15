@@ -22,7 +22,7 @@ const Wallet = () => {
   const web3 = new Web3(Web3.givenProvider);
   const [account, setAccount] = useState();
   const [balance, setBalance] = useState();
-  const [isETH, setIsETH] = useState(true);
+  
   const [balanceSleep, setBalanceSleep] = useState();
   const navigate = useNavigate();
 
@@ -45,19 +45,19 @@ const Wallet = () => {
     })();
   }, [account, web3]);
 
-  const SwitchBalance = async () => {
-    isETH ? setIsETH(false) : setIsETH(true);
-    if (isETH) {
-      const bal = await web3.eth.getBalance(account);
-      setBalance(bal);
-    } else {
-      const token = new web3.eth.Contract(SLEEPY_ABI, SLEEPY_ADDRESS);
-      // console.log(token);
-      const balance = await token.methods.balanceOf(account).call();
-      // console.log(balance);
-      setBalance(balance);
-    }
-  };
+  // const SwitchBalance = async () => {
+  //   isETH ? setIsETH(false) : setIsETH(true);
+  //   if (isETH) {
+  //     const bal = await web3.eth.getBalance(account);
+  //     setBalance(bal);
+  //   } else {
+  //     const token = new web3.eth.Contract(SLEEPY_ABI, SLEEPY_ADDRESS);
+  //     // console.log(token);
+  //     const balance = await token.methods.balanceOf(account).call();
+  //     // console.log(balance);
+  //     setBalance(balance);
+  //   }
+  // };
 
   return (
     <Background>

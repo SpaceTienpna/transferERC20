@@ -7,12 +7,11 @@ import styled from "styled-components";
 import Web3 from "web3";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { ethers } from "ethers";
 
 const TransferAsset = () => {
   const web3 = new Web3(Web3.givenProvider);
   const [account, setAccount] = useState();
-  const [balance, setBalance] = useState();
+  // const [balance, setBalance] = useState();
   const { token } = useParams();
 
   useEffect(() => {
@@ -20,8 +19,8 @@ const TransferAsset = () => {
       let acc = await web3.eth.getAccounts();
       if (acc.length === 0) acc = await web3.eth.requestAccounts();
       setAccount(acc[0]);
-      const bal = await web3.eth.getBalance(acc[0]);
-      setBalance(web3.utils.fromWei(bal, "ether"));
+      // const bal = await web3.eth.getBalance(acc[0]);
+      // setBalance(web3.utils.fromWei(bal, "ether"));
     })();
   }, []);
 

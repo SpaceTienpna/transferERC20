@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 // import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IERC20.sol";
 
-contract MyContract {
+contract MyAnotherContract {
     constructor() {}
 
     event Transfer(address from, address to, uint256 amount);
@@ -15,7 +15,7 @@ contract MyContract {
     }
 
     function withdraw(address token, uint256 amount) external payable {
-        IERC20(token).transfer(msg.sender, amount);
+        IERC20(token).transferFrom(address(this), msg.sender, amount);
         emit Transfer(address(this), msg.sender, amount);
     }
 
@@ -23,11 +23,6 @@ contract MyContract {
         return IERC20(token).balanceOf(address(this));
     }
 
-    function withdrawTransferFrom(address token, uint256 amount)
-        external
-        payable
-    {
-        IERC20(token).transferFrom(address(this), msg.sender, amount);
-        emit Transfer(address(this), msg.sender, amount);
-    }
 }
+
+

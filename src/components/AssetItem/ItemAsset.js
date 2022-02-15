@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Text, Box, Grid, Avatar, GridItem } from "@chakra-ui/react";
+import { Text, Grid, Avatar, GridItem } from "@chakra-ui/react";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 
 import styled from "styled-components";
@@ -44,9 +44,9 @@ const AssetItem = styled.div`
   }
 `;
 
-const ItemIcon = styled.div`
-  font-size: 35px;
-  color: #b4b8bc;
-`;
+// const ItemIcon = styled.div`
+//   font-size: 35px;
+//   color: #b4b8bc;
+// `;
 
 export default ItemAsset;

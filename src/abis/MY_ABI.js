@@ -102,10 +102,29 @@ export const ABI_MY_CONTRACT = [
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawTransferFrom",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
   }
-]
+];
 
-export const ADDRESS_MY_CONTRACT = "0xa6581e0D7BA12f36f883d9D10F3332f1FB9DF15C";
+// export const ADDRESS_MY_CONTRACT = "0xa6581e0D7BA12f36f883d9D10F3332f1FB9DF15C";
+export const ADDRESS_MY_CONTRACT = "0xfC598F5BBA5c7C7Ba092799BEf9E26d4294d7DE0";
 
 
 

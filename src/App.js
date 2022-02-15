@@ -1,7 +1,6 @@
 import { ChakraProvider } from "@chakra-ui/react";
 // import logo from '../logo.png';
 import "./App.css";
-import Web3 from "web3";
 import Wallet from "./components/Wallet";
 import TransferAsset from "./components/Transfer/TransferAsset";
 import { Routes, Route } from "react-router-dom";
