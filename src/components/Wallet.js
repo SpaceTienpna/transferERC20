@@ -17,12 +17,12 @@ import "./Wallet.css";
 import Web3 from "web3";
 import { useEffect, useState } from "react";
 import ItemAsset from "./AssetItem/ItemAsset";
-
+import axios from "axios";
 const Wallet = () => {
   const web3 = new Web3(Web3.givenProvider);
   const [account, setAccount] = useState();
   const [balance, setBalance] = useState();
-  
+
   const [balanceSleep, setBalanceSleep] = useState();
   const navigate = useNavigate();
 
@@ -33,13 +33,14 @@ const Wallet = () => {
       setAccount(acc[0]);
       const bal = await web3.eth.getBalance(acc[0]);
       setBalance(web3.utils.fromWei(bal, "ether"));
+      axios.get(`http://localhost:3000/users/`).then((rep) => console.log(rep.data));
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
       const token = new web3.eth.Contract(SLEEPY_ABI, SLEEPY_ADDRESS);
-      console.log(token);
+      // console.log(token);
       const balSleep = await token.methods.balanceOf(account).call();
       setBalanceSleep(web3.utils.fromWei(balSleep, "ether"));
     })();

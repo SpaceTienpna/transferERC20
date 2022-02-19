@@ -5,6 +5,7 @@ import Wallet from "./components/Wallet";
 import TransferAsset from "./components/Transfer/TransferAsset";
 import { Routes, Route } from "react-router-dom";
 import TransferAvalanche from "./components/Transfer/TransferAvalanche";
+import CrossChain from './components/Transfer/CrossChain';
 
 const App = () => {
   return (
@@ -12,7 +13,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Wallet />} exact />
         <Route path="/transfer/:token" element={<TransferAsset />} exact /> 
-        <Route path="/transfer" element={<TransferAvalanche />} exact /> 
+        <Route path="/transfer" element={<TransferAvalanche />} exact />
+        <Route path="/crosschain" element={<CrossChain />} exact /> 
       </Routes>
     </ChakraProvider>
   );
