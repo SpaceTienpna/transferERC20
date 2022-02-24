@@ -33,7 +33,7 @@ const Wallet = () => {
       setAccount(acc[0]);
       const bal = await web3.eth.getBalance(acc[0]);
       setBalance(web3.utils.fromWei(bal, "ether"));
-      axios.get(`http://localhost:3000/users/`).then((rep) => console.log(rep.data));
+      // axios.get(`http://localhost:3000/users/`).then((rep) => console.log(rep.data));
     })();
   }, []);
 
