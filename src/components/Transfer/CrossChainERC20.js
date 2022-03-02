@@ -18,15 +18,14 @@ import {
 } from "@chakra-ui/react";
 import { ArrowForwardIcon } from "@chakra-ui/icons";
 import styles from "./style.module.css";
+import useProvider from "../../hooks/useProvider";
 import {
   ABI_CROSSCHAIN,
   ADDRESS_RINKEBY_CROSSCHAIN,
   ADDRESS_ROPSTEN_CROSSCHAIN,
+  ADDRESS_BINANCE_CROSSCHAIN,
 } from "../../abis/MY_ABI";
-import {
-  ABI_SLEEPTO,
-
-} from "../../abis/SLEEPY_TOKEN";
+import { ABI_SLEEPTO } from "../../abis/SLEEPY_TOKEN";
 import {
   PROVIDER_ROPSTEN,
   PROVIDER_RINKEBY,
@@ -37,7 +36,6 @@ import styled from "styled-components";
 import Web3 from "web3";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { createAlchemyWeb3 } from "@alch/alchemy-web3";
 
 const CrossChainERC20 = () => {
   const toast = useToast();
@@ -55,8 +53,8 @@ const CrossChainERC20 = () => {
   const [toBlock, setToBlock] = useState();
   const [listChain, setListChain] = useState([]);
   const [provider, setProvider] = useState();
-  const [listPair, setListPair] = useState([]);
-
+  const [listToken, setListToken] = useState([]);
+  const { getProviders } = useProvider();
   // -------------- set up side effect
   useEffect(() => {
     (async () => {
@@ -67,7 +65,6 @@ const CrossChainERC20 = () => {
       const bal = await web3.eth.getBalance(
         web3.utils.toChecksumAddress(account)
       );
-
       setBalance(web3.utils.fromWei(bal, "ether"));
     })();
   }, [blockChainName]);
@@ -79,6 +76,9 @@ const CrossChainERC20 = () => {
       }
       case 4: {
         return ADDRESS_RINKEBY_CROSSCHAIN;
+      }
+      case 97: {
+        return ADDRESS_BINANCE_CROSSCHAIN;
       }
       default: {
         return "";
@@ -109,7 +109,7 @@ const CrossChainERC20 = () => {
       setCurrency(block.data.chain.currency);
 
       await window.ethereum.on("chainChanged", (chainId) => {
-        setListPair([]);
+        setListToken([]);
         setListChain([]);
         setChainGId(chainId);
       });
@@ -118,10 +118,10 @@ const CrossChainERC20 = () => {
       setFromAddress(getAddressContract(chain));
 
       const pairs = await axios.get(
-        `http://localhost:3001/pair/pairChain?chain=${chain}`
+        `http://localhost:3001/token/getTokenByChainId?chain=${chain}`
       );
-      pairs.data.result.map((item) => {
-        setListPair((arr) => [...arr, item]);
+      pairs.data.tokens.map((item) => {
+        setListToken((arr) => [...arr, item]);
       });
     })();
   }, [chainGId]);
@@ -133,10 +133,29 @@ const CrossChainERC20 = () => {
     // set contract destination address
     setToAddress(getAddressContract(Number(chainItem.chainId)));
     //set web3 of destination
-    const web3Alcm = createAlchemyWeb3(getProvider(Number(chainItem.chainId)));
-    setProvider(web3Alcm);
-    const bal = await web3Alcm.eth.getBalance(account);
-    setToBalance(web3Alcm.utils.fromWei(bal, "ether"));
+    // const web3Alcm = createAlchemyWeb3(getProvider(Number(chainItem.chainId)));
+    // console.log('webal', web3Alcm);
+    const web3next = await getProviders(Number(chainItem.chainId));
+    setProvider(web3next);
+    const bal = await web3next.eth.getBalance(account);
+    setToBalance(web3next.utils.fromWei(bal, "ether"));
+  };
+
+  const getChangeToken = async (event) => {
+    const address = JSON.parse(event.target.value).token;
+    setFromToken(address);
+    setListChain([]);
+    const chain = await web3.eth.getChainId();
+    const listChain = await axios.get(
+      `http://localhost:3001/pair/pair-existed?chain=${chain}&token=${address}`
+    );
+
+    for (const chain of listChain.data.result) {
+      const object = await axios.get(
+        `http://localhost:3001/chains/getByChainId?chainId=${chain.chain_2}`
+      );
+      setListChain((arr) => [...arr, object.data.chain]);
+    }
   };
   // ---------------- end setup side effect
 
@@ -146,8 +165,6 @@ const CrossChainERC20 = () => {
     const pair = await axios.get(
       `http://localhost:3001/pair/getPair?token=${fromToken}&chain1=${currentChain}&chain2=${toChainId}`
     );
-    console.log(fromToken, currentChain, toChainId);
-    console.log("pair", pair);
     const amount = document.getElementsByClassName("send")[0].value;
 
     switch (pair.data.isReverse) {
@@ -191,19 +208,20 @@ const CrossChainERC20 = () => {
       })
       .then(async (receipt) => {
         console.log("receipt", receipt);
-        const web3Alcm = createAlchemyWeb3(getProvider(Number(pair.chain_2)));
+        // const web3next = createAlchemyWeb3(getProvider(Number(pair.chain_2)));
+        const web3next = await getProviders(Number(pair.chain_2));
         // adding verifier for wallet
-        const verifier = await web3Alcm.eth.accounts.wallet.add(
+        const verifier = await web3next.eth.accounts.wallet.add(
           process.env.REACT_APP_MY_PRIVATE_KEY
         );
-        const tokenMint = new web3Alcm.eth.Contract(
+        const tokenMint = new web3next.eth.Contract(
           ABI_SLEEPTO.abi,
           pair.token_2
         );
 
         const tx = await tokenMint.methods.mint(
           verifier.address,
-          web3Alcm.utils.toWei(amount, "ether")
+          web3next.utils.toWei(amount, "ether")
         );
 
         const [gasCost] = await Promise.all([
@@ -218,7 +236,7 @@ const CrossChainERC20 = () => {
           gas: 100000,
           gasCost,
         };
-        await web3Alcm.eth.sendTransaction(txData).then((rep) => {
+        await web3next.eth.sendTransaction(txData).then((rep) => {
           toast({
             title: "Transaction success!!",
             description: `Your transaction successfully at: ${rep.transactionHash}`,
@@ -244,25 +262,22 @@ const CrossChainERC20 = () => {
         data: transact,
       })
       .then(async (receipt) => {
-        console.log("repceipt", receipt);
-        const web3Alcm = createAlchemyWeb3(getProvider(Number(pair.chain_2)));
-        const verifier = await web3Alcm.eth.accounts.wallet.add(
+        // const web3Alcm = createAlchemyWeb3(getProvider(Number(pair.chain_2)));
+        const web3next = await getProviders(Number(pair.chain_2));
+        const verifier = await web3next.eth.accounts.wallet.add(
           process.env.REACT_APP_MY_PRIVATE_KEY
         );
-        console.log("verifier", verifier);
-        const contractTo = new web3Alcm.eth.Contract(
+        const contractTo = new web3next.eth.Contract(
           ABI_CROSSCHAIN.abi,
           toAddress
         );
         const tx = await contractTo.methods.withdrawERC20(
           pair.token_2,
-          web3Alcm.utils.toWei(amount, "ether")
+          web3next.utils.toWei(amount, "ether")
         );
-        console.log("tx", tx);
         const [gasCost] = await Promise.all([
           tx.estimateGas({ from: verifier.address }),
         ]);
-        console.log("gas cost", gasCost);
         const data = tx.encodeABI();
         const txData = {
           from: verifier.address,
@@ -271,9 +286,16 @@ const CrossChainERC20 = () => {
           gas: 100000,
           gasCost,
         };
-        console.log("tx", txData);
-        const rep = await web3Alcm.eth.sendTransaction(txData);
-        console.log("transacttion", rep);
+// 
+        await web3next.eth.sendTransaction(txData).then((rep) => {
+          toast({
+            title: "Transaction success!!",
+            description: `Your transaction successfully at: ${rep.transactionHash}`,
+            status: "success",
+            duration: 9000,
+            isClosable: true,
+          });
+        });
       });
   };
   //---- end flow zone
@@ -295,30 +317,14 @@ const CrossChainERC20 = () => {
     });
   };
 
-  const getChangeToken = async (event) => {
-    const address = JSON.parse(event.target.value).token_1;
-    setFromToken(address);
-    // const token = new web3.eth.Contract(ABI_SLEEPTO.abi, address);
-    // await token.methods
-    //   .balanceOf(account)
-    //   .call()
-    //   .then((rep) => setBalance(web3.utils.fromWei(rep, "ether")));
-    // await token.methods
-    //   .symbol()
-    //   .call()
-    //   .then((rep) => setCurrency(rep));
-    const chain = await web3.eth.getChainId();
-    const listChain = await axios.get(
-      `http://localhost:3001/pair/pair-existed?chain=${chain}&token=${address}`
-    );
-    for (const chain of listChain.data.result) {
-      const object = await axios.get(
-        `http://localhost:3001/chains/getByChainId?chainId=${chain.chain_2}`
-      );
-      console.log(object.data.chain);
-      setListChain((arr) => [...arr, object.data.chain]);
-    }
+  const getBalance = async () => {
+    // const token = new web3.eth.Contract(
+    //   ABI_SLEEPTO.abi,
+    //   ADDRESS_SLEEPTO_AVALANCHE
+    // );
+    // console.log("here", await token.methods.balanceOf(account).call());
   };
+
   const withdrawETH = async () => {
     const contract = new web3.eth.Contract(ABI_CROSSCHAIN.abi, fromAddress);
     const amount = document.getElementsByClassName("send")[0].value;
@@ -399,17 +405,17 @@ const CrossChainERC20 = () => {
                     <Text>
                       {blockChainName ? blockChainName : "No block found"}
                     </Text>
-                    {listPair.length > 0 ? (
+                    {listToken.length > 0 ? (
                       <Select
                         onChange={getChangeToken}
                         maxW={`50%`}
                         fontSize={`sm`}
                         placeholder="Select token"
                       >
-                        {listPair.map((item, index) => {
+                        {listToken.map((item, index) => {
                           return (
                             <option key={index} value={JSON.stringify(item)}>
-                              {item.token_1}
+                              {item.tokenSymbol}
                             </option>
                           );
                         })}

@@ -3,8 +3,11 @@ export const PROVIDERS = [
   "https://eth-ropsten.alchemyapi.io/v2/LEiNoqoKrpSOgmD0Cl7aX9mpB3QWSD6I",
   "https://eth-rinkeby.alchemyapi.io/v2/OSdVyTv3Y6wgPrWg_93E499tTn7YFHwu",
   "https://eth-goerli.alchemyapi.io/v2/F_VRc_rD6rKfk-gLKW4JuSywWZg-wP1m",
+  "https://speedy-nodes-nyc.moralis.io/88147269e19027c61c9bac3c/bsc/testnet"
 ];
 
 export const PROVIDER_ROPSTEN = "https://eth-ropsten.alchemyapi.io/v2/LEiNoqoKrpSOgmD0Cl7aX9mpB3QWSD6I";
 export const PROVIDER_RINKEBY= "https://eth-rinkeby.alchemyapi.io/v2/OSdVyTv3Y6wgPrWg_93E499tTn7YFHwu";
 export const PROVIDER_GOERLI = "https://eth-goerli.alchemyapi.io/v2/F_VRc_rD6rKfk-gLKW4JuSywWZg-wP1m";
+export const PROVIDER_BINANCE = "https://speedy-nodes-nyc.moralis.io/88147269e19027c61c9bac3c/bsc/testnet";
+export const PROVIDER_AVALANCHE = "https://speedy-nodes-nyc.moralis.io/88147269e19027c61c9bac3c/avalanche/testnet";

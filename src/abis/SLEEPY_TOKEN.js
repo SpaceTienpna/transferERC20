@@ -743,8 +743,400 @@ export const ABI_SLEEPTO = {
   deployedLinkReferences: {},
 };
 
-export const ADDRESS_SLEEPTO_AVALANCHE = "0xc30e6777d3bfa606b35d5f0e8db332e16ca9a3d9";
-export const ADDRESS_SLEEPTO_RINKEBY = "0x842acF7242e18c0a7F3AB645d782504063d42c09";
+export const ABI_SLEEPTO_BEP20 = [
+  {
+    inputs: [],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "spender",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "value",
+        type: "uint256",
+      },
+    ],
+    name: "Approval",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "value",
+        type: "uint256",
+      },
+    ],
+    name: "Transfer",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "spender",
+        type: "address",
+      },
+    ],
+    name: "allowance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "spender",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "approve",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "balanceOf",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "value",
+        type: "uint256",
+      },
+    ],
+    name: "burn",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "decimals",
+    outputs: [
+      {
+        internalType: "uint8",
+        name: "",
+        type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "spender",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "subtractedValue",
+        type: "uint256",
+      },
+    ],
+    name: "decreaseAllowance",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getOwner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "spender",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "addedValue",
+        type: "uint256",
+      },
+    ],
+    name: "increaseAllowance",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "mint",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "name",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "symbol",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "totalSupply",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "recipient",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "transfer",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "recipient",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "transferFrom",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
+
+export const ADDRESS_SLEEPTO_AVALANCHE =
+  "0xc30e6777d3bfa606b35d5f0e8db332e16ca9a3d9";
+export const ADDRESS_SLEEPTO_RINKEBY =
+  "0x842acF7242e18c0a7F3AB645d782504063d42c09";
+export const ADDRESS_SLEEPTO_BINANACE =
+  // "0x32e19Ba230dad783e14Cc6d578dE3F7d6fbc0a10"
+  "0xB7DFa0485916Aba397EDa6514b9D7F612ee6e50D";
+
 // --------- sleepy ropsten
 export const ADDRESS_SLEEPY = "0x85f13db811c1d8e22679cf56ca91931562d837b2";
 export const ABI_SLEEPY = [
