@@ -20,29 +20,24 @@ import { ArrowForwardIcon } from "@chakra-ui/icons";
 import styles from "./style.module.css";
 import useProvider from "../../hooks/useProvider";
 import {
-  ABI_CROSSCHAIN,
-  ADDRESS_RINKEBY_CROSSCHAIN,
-  ADDRESS_ROPSTEN_CROSSCHAIN,
-  ADDRESS_BINANCE_CROSSCHAIN,
+  // ABI_CROSSCHAIN,
+  ABI_MINT_BURN,
+  ABI_TRANSFER,
+  ABI_TRANSFER_BSC,
 } from "../../abis/MY_ABI";
-import { ABI_SLEEPTO } from "../../abis/SLEEPY_TOKEN";
-import {
-  PROVIDER_ROPSTEN,
-  PROVIDER_RINKEBY,
-  PROVIDER_GOERLI,
-} from "../../Utils/Providers";
 import styled from "styled-components";
 // import logo from '../logo.png';
 import Web3 from "web3";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import useABI from "../../hooks/useABI";
 
 const CrossChainERC20 = () => {
   const toast = useToast();
   const web3 = new Web3(Web3.givenProvider);
   const [fromToken, setFromToken] = useState();
-  const [fromAddress, setFromAddress] = useState(); // contract address main net
-  const [toAddress, setToAddress] = useState(); // contract address side net
+  // const [fromAddress, setFromAddress] = useState(); // contract address main net
+  // const [toAddress, setToAddress] = useState(); // contract address side net
   const [account, setAccount] = useState();
   const [currency, setCurrency] = useState(`ETH`);
   const [balance, setBalance] = useState();
@@ -55,6 +50,7 @@ const CrossChainERC20 = () => {
   const [provider, setProvider] = useState();
   const [listToken, setListToken] = useState([]);
   const { getProviders } = useProvider();
+  const { getABI, getTransferABI } = useABI();
   // -------------- set up side effect
   useEffect(() => {
     (async () => {
@@ -69,35 +65,22 @@ const CrossChainERC20 = () => {
     })();
   }, [blockChainName]);
 
-  const getAddressContract = (chainid) => {
-    switch (chainid) {
-      case 3: {
-        return ADDRESS_ROPSTEN_CROSSCHAIN;
-      }
-      case 4: {
-        return ADDRESS_RINKEBY_CROSSCHAIN;
-      }
-      case 97: {
-        return ADDRESS_BINANCE_CROSSCHAIN;
-      }
-      default: {
-        return "";
-      }
-    }
-  };
-
-  const getProvider = (chainid) => {
-    switch (chainid) {
-      case 3:
-        return PROVIDER_ROPSTEN;
-      case 4:
-        return PROVIDER_RINKEBY;
-      case 5:
-        return PROVIDER_GOERLI;
-      default:
-        return "";
-    }
-  };
+  // const getAddressContract = (chainid) => {
+  //   switch (chainid) {
+  //     case 3: {
+  //       return ADDRESS_ROPSTEN_CROSSCHAIN;
+  //     }
+  //     case 4: {
+  //       return ADDRESS_RINKEBY_CROSSCHAIN;
+  //     }
+  //     case 97: {
+  //       return ADDRESS_BINANCE_CROSSCHAIN;
+  //     }
+  //     default: {
+  //       return "";
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
     (async () => {
@@ -115,7 +98,7 @@ const CrossChainERC20 = () => {
       });
 
       // set address main
-      setFromAddress(getAddressContract(chain));
+      // setFromAddress(getAddressContract(chain));
 
       const pairs = await axios.get(
         `http://localhost:3001/token/getTokenByChainId?chain=${chain}`
@@ -131,7 +114,7 @@ const CrossChainERC20 = () => {
     setToChainId(chainItem.chainId);
     setToBlock(chainItem.chainName);
     // set contract destination address
-    setToAddress(getAddressContract(Number(chainItem.chainId)));
+    // setToAddress(getAddressContract(Number(chainItem.chainId)));
     //set web3 of destination
     // const web3Alcm = createAlchemyWeb3(getProvider(Number(chainItem.chainId)));
     // console.log('webal', web3Alcm);
@@ -191,36 +174,42 @@ const CrossChainERC20 = () => {
 
   const OnTransaction = async (pair, amount) => {
     // write here
-    const token = new web3.eth.Contract(ABI_SLEEPTO.abi, pair.token_1);
+    const token = new web3.eth.Contract(
+      getABI(Number(pair.chain_1)),
+      pair.token_1
+    );
+  
     await token.methods
-      .approve(fromAddress, web3.utils.toWei(amount, "ether"))
+      .approve(pair.contractTool_1, web3.utils.toWei(amount, "ether"))
       .send({ from: account });
-    const contract = new web3.eth.Contract(ABI_CROSSCHAIN.abi, fromAddress);
+    const contract = new web3.eth.Contract(
+      getTransferABI(Number(pair.chain_1)),
+      pair.contractTool_1
+    );
     const transaction = await contract.methods
-      .depositERC20(pair.token_1, web3.utils.toWei(amount, "ether"))
+      .depositToken(pair.token_1, web3.utils.toWei(amount, "ether"))
       .encodeABI();
     await web3.eth
       .sendTransaction({
         from: account,
-        to: fromAddress,
+        to: pair.contractTool_1,
         gas: 250000,
         data: transaction,
       })
       .then(async (receipt) => {
-        console.log("receipt", receipt);
-        // const web3next = createAlchemyWeb3(getProvider(Number(pair.chain_2)));
         const web3next = await getProviders(Number(pair.chain_2));
         // adding verifier for wallet
         const verifier = await web3next.eth.accounts.wallet.add(
           process.env.REACT_APP_MY_PRIVATE_KEY
         );
         const tokenMint = new web3next.eth.Contract(
-          ABI_SLEEPTO.abi,
-          pair.token_2
+          ABI_MINT_BURN,
+          pair.contractTool_2
         );
 
-        const tx = await tokenMint.methods.mint(
-          verifier.address,
+        const tx = await tokenMint.methods.MintToken(
+          pair.token_2,
+          account, // mint cho ai thi modify lai
           web3next.utils.toWei(amount, "ether")
         );
 
@@ -231,7 +220,8 @@ const CrossChainERC20 = () => {
         const data = tx.encodeABI();
         const txData = {
           from: verifier.address,
-          to: pair.token_2,
+          // to: pair.token_2,
+          to: pair.contractTool_2,
           data,
           gas: 100000,
           gasCost,
@@ -241,7 +231,7 @@ const CrossChainERC20 = () => {
             title: "Transaction success!!",
             description: `Your transaction successfully at: ${rep.transactionHash}`,
             status: "success",
-            duration: 9000,
+            duration: 30000,
             isClosable: true,
           });
         });
@@ -249,15 +239,20 @@ const CrossChainERC20 = () => {
   };
 
   const OnReverseTransaction = async (pair, amount) => {
-    const token = new web3.eth.Contract(ABI_SLEEPTO.abi, pair.token_1);
-    const transact = await token.methods
-      .burn(account, web3.utils.toWei(amount, "ether"))
-      .encodeABI();
+    const contract = new web3.eth.Contract(
+      ABI_MINT_BURN,
+      pair.contractTool_1
+    );
 
+    const transact = await contract.methods
+      .BurnToken(pair.token_1, web3.utils.toWei(amount, "ether"))
+      .encodeABI();
+    console.log(account);
+    console.log(pair.token_1);
     await web3.eth
       .sendTransaction({
         from: account,
-        to: pair.token_1,
+        to: pair.contractTool_1,
         gas: 250000,
         data: transact,
       })
@@ -268,11 +263,12 @@ const CrossChainERC20 = () => {
           process.env.REACT_APP_MY_PRIVATE_KEY
         );
         const contractTo = new web3next.eth.Contract(
-          ABI_CROSSCHAIN.abi,
-          toAddress
+          getTransferABI(Number(pair.chain_2)),
+          pair.contractTool_2
         );
-        const tx = await contractTo.methods.withdrawERC20(
+        const tx = await contractTo.methods.withdrawToken(
           pair.token_2,
+          account,
           web3next.utils.toWei(amount, "ether")
         );
         const [gasCost] = await Promise.all([
@@ -281,41 +277,24 @@ const CrossChainERC20 = () => {
         const data = tx.encodeABI();
         const txData = {
           from: verifier.address,
-          to: toAddress,
+          to: pair.contractTool_2,
           data,
           gas: 100000,
           gasCost,
         };
-// 
+        //
         await web3next.eth.sendTransaction(txData).then((rep) => {
           toast({
             title: "Transaction success!!",
             description: `Your transaction successfully at: ${rep.transactionHash}`,
             status: "success",
-            duration: 9000,
+            duration: 30000,
             isClosable: true,
           });
         });
       });
   };
-  //---- end flow zone
 
-  //------------- Testing zone
-  const depositETH = async () => {
-    const contract = new web3.eth.Contract(ABI_CROSSCHAIN.abi, fromAddress);
-    const amount = document.getElementsByClassName("send")[0].value;
-    await contract.methods.depositETH().send({
-      from: account,
-      value: web3.utils.toWei(amount, "ether"),
-    });
-    toast({
-      title: "Deposit Success!",
-      description: "Transfer success! Check ur contract please.",
-      status: "success",
-      duration: 9000,
-      isClosable: true,
-    });
-  };
 
   const getBalance = async () => {
     // const token = new web3.eth.Contract(
@@ -325,20 +304,24 @@ const CrossChainERC20 = () => {
     // console.log("here", await token.methods.balanceOf(account).call());
   };
 
-  const withdrawETH = async () => {
-    const contract = new web3.eth.Contract(ABI_CROSSCHAIN.abi, fromAddress);
-    const amount = document.getElementsByClassName("send")[0].value;
-    await contract.methods
-      .withdrawETH(web3.utils.toWei(amount, "ether"))
-      .send({ from: account });
-    toast({
-      title: "Withdraw Success!",
-      description: "Transfer success! Check ur balance please.",
-      status: "success",
-      duration: 9000,
-      isClosable: true,
-    });
-  };
+  // const withdrawETH = async () => {
+  //   const currentChain = await web3.eth.getChainId();
+  //   const pair = await axios.get(
+  //     `http://localhost:3001/pair/getPair?token=${fromToken}&chain1=${currentChain}&chain2=${toChainId}`
+  //   );
+  //   const contract = new web3.eth.Contract(ABI_CROSSCHAIN.abi, fromAddress);
+  //   const amount = document.getElementsByClassName("send")[0].value;
+  //   await contract.methods
+  //     .withdrawERC20(pair.data.token_1, web3.utils.toWei(amount, "ether"))
+  //     .send({ from: account });
+  //   toast({
+  //     title: "Withdraw Success!",
+  //     description: "Transfer success! Check ur balance please.",
+  //     status: "success",
+  //     duration: 9000,
+  //     isClosable: true,
+  //   });
+  // };
 
   const GetTransactionHash = async () => {
     // const contract = new web3.eth.Contract(ABI_CROSSCHAIN.abi, fromAddress);
